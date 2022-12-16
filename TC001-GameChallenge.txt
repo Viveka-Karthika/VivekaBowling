@@ -1,0 +1,58 @@
+export class Bowling{
+    constructor(private rolls: number[]) {}
+    score(): number {
+      let rolls = this.rolls
+      if (rolls.length === 0) {
+        throw new Error('Score cannot be taken until the end of the game')
+      }
+      /* Increments only when an event happens */
+      let frameIndex = 1
+      let nRolls = 0 
+      let i = 0
+      let score = 0
+
+      /* The 10th frame will the handled separately */
+      while (frameIndex <= 10) { 
+        let roll = rolls[i] 
+        if (roll < 0 || roll > 10) {
+          throw new Error('Pins must have a value from 0 to 10')
+        }
+        let frame = roll === 10 ? roll : roll + rolls[i + 1]
+        /* Open frame */
+        if (frame > 10) {
+          throw new Error('Pin count exceeds pins on the lane')
+        } else if (frame < 10) { 
+          score += frame
+          i += 2
+          nRolls++
+        } else if (roll === 10) { //strike
+          if (frameIndex === 10 && rolls[i + 1] !== 10 && rolls[i + 1] + rolls[i + 2] > 10) { //two bonus rolls after a strike in the last frame can not score more than 10 points
+            throw new Error('Pin count exceeds pins on the lane')
+          }
+          if (frameIndex === 10 
+            && ((rolls[i + 1] === 10 && rolls[i + 2] === undefined)
+              || (rolls[i + 1] === undefined && rolls[i + 2] === undefined))) {
+            throw new Error('Score cannot be taken until the end of the game')
+          }
+          score += frame + rolls[i + 1] + rolls[i + 2] //note we must add back roll[i+1] since frame = roll[i] for this case
+          i++;
+          nRolls++
+        } else if (frame === 10) { //spare 
+          if (frameIndex === 10 && rolls[i + 2] === undefined) {
+            throw new Error('Score cannot be taken until the end of the game')
+          }
+          score += frame + rolls[i + 2]
+          i+=2 
+          nRolls++
+        } 
+        frameIndex++
+      }
+      if (nRolls !== 10) {
+        throw new Error('Score cannot be taken until the end of the game')
+      }
+      if (rolls.length > 20 && score === 0) {
+        throw new Error('Should not be able to roll after game is over')
+      }
+      return score
+    }
+  }
